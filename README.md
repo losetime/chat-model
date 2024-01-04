@@ -1,6 +1,11 @@
 # 关于项目
 
-介绍还没想好，欢迎补充
+百度千帆模型对接，私有知识库
+
+# 相关文档
+```
+知识库接口： https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Blmygz6t6#%E5%8A%9F%E8%83%BD%E4%BB%8B%E7%BB%8D
+```
 
 # 技术栈
 
