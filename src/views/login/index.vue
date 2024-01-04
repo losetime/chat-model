@@ -17,7 +17,7 @@
     <div class="form-wrap" v-else>
       <div class="form-sub-wrap">
         <div class="title-wrap">
-          <p class="title-text">作业人员职业健康及应急保障系统</p>
+          <p class="title-text">云脉大模型</p>
           <p class="subtitle-text">OCCUPATIONAL HEALTH AND EMERGENCY SUPPORT SYSTEM FOR OPERATORS</p>
         </div>
         <a-form :label-col="labelCol">

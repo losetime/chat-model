@@ -8,7 +8,7 @@
   >
     <div class="logo-wrap" @click="handleJumpHome">
       <SlackOutlined />
-      <span v-if="!sidebarStatus">作业人员职业健康及应急保障系统</span>
+      <span v-if="!sidebarStatus">云脉大模型</span>
     </div>
     <a-menu mode="inline" theme="dark" :selectedKeys="navKey" @select="handleSelectKeys">
       <template v-for="item in sidebarMenu" :key="item.name">
