@@ -10,7 +10,10 @@
       >
         <div class="chat-name">
           <AliwangwangOutlined />
-          {{ item.chatName }}
+          <a-tooltip>
+            <template #title>{{ item.chatName }}</template>
+            <div class="name-text">{{ item.chatName }}</div>
+          </a-tooltip>
         </div>
         <a-space v-if="chatActiveIndex === index">
           <FormOutlined @click.stop="handleUpdateChat" />
@@ -157,7 +160,7 @@ const handleUpdateChat = () => {
     .group-item {
       display: flex;
       justify-content: space-between;
-      padding: 14px 20px;
+      padding: 14px;
       margin-top: 14px;
       border: 1px solid #e1e0e0;
       cursor: pointer;
@@ -165,6 +168,18 @@ const handleUpdateChat = () => {
       &:hover {
         border: 1px dashed #1677ff;
         color: #1677ff;
+      }
+      .chat-name {
+        display: flex;
+        align-items: center;
+        .name-text {
+          width: 145px;
+          padding: 0 8px;
+          flex: 1;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
       }
     }
     .group-item-active {
