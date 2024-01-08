@@ -20,7 +20,7 @@
     </div>
     <div class="content-wrap">
       <ChatRender ref="chatRenderInstance" :chatActiveIndex="chatActiveIndex" />
-      <div class="input-wrap">
+      <div class="input-wrap" v-if="chatGroup.length > 0">
         <a-input v-model:value="questionMsg" placeholder="请输入" @pressEnter="handleQuestionSubmit" />
         <a-button type="primary" :icon="h(SendOutlined)" :disabled="!questionMsg" @click="handleQuestionSubmit" />
       </div>
@@ -39,6 +39,7 @@ import { useChatStore } from '@/store/modules/chat'
 import { YmModal } from '@/utils/antd'
 import { useCompRef } from '@/hooks/useCompRef'
 import { actionTypeEnum } from '@/enums/commonEnum'
+import { message } from 'ant-design-vue'
 
 const chatStore = useChatStore()
 
@@ -63,9 +64,14 @@ const chatRenderInstance = useCompRef<typeof ChatRender>()
 
 const handleQuestionSubmit = () => {
   if (!questionMsg.value) return
+  const instance = chatRenderInstance.value
   const queryMsg = questionMsg.value
   questionMsg.value = ''
-  chatRenderInstance.value?.getChatAnswer(queryMsg)
+  // 修改对话标题为第一个问题
+  if (instance && instance.chatContent.length <= 0) {
+    chatGroup.value[chatActiveIndex.value].chatName = queryMsg
+  }
+  instance?.getChatAnswer(queryMsg)
 }
 
 /**
@@ -73,11 +79,15 @@ const handleQuestionSubmit = () => {
  */
 const handleChatInit = () => {
   const chatInfoList = chatStore.chatInfoList
-  if (chatInfoList.length <= 0) return
-  // 设置对话组
-  chatGroup.value = chatInfoList.map((item: any) => ({ chatName: item.chatName, chatId: item.chatId }))
-  // 设置对话内容
-  chatRenderInstance.value?.setChatContent(chatInfoList[chatActiveIndex.value].chatContent)
+  if (chatInfoList.length > 0) {
+    // 设置对话组
+    chatGroup.value = chatInfoList.map((item: any) => ({ chatName: item.chatName, chatId: item.chatId }))
+    // 设置对话内容
+    chatRenderInstance.value?.setChatContent(chatInfoList[chatActiveIndex.value].chatContent)
+  } else {
+    chatGroup.value = []
+    chatRenderInstance.value?.setChatContent([])
+  }
 }
 
 /**
@@ -93,9 +103,14 @@ const handleNewChat = () => {
  * @desc 切换对话
  */
 const handleSwitchChat = (chatId: string) => {
-  chatStore.chatActiveId = chatId
-  // 设置对话内容
-  chatRenderInstance.value?.setChatContent(chatStore.chatInfoList[chatActiveIndex.value].chatContent)
+  const instance = chatRenderInstance.value
+  if (instance?.answerDone) {
+    message.info('请稍等，正在接收...')
+  } else {
+    chatStore.chatActiveId = chatId
+    // 设置对话内容
+    chatRenderInstance.value?.setChatContent(chatStore.chatInfoList[chatActiveIndex.value].chatContent)
+  }
 }
 
 /**

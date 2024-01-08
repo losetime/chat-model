@@ -62,7 +62,7 @@ const propsData = defineProps({
 })
 
 const newFileList = computed(() => {
-  return (propsData.fileList || []).map((e) => ({ ...e, status: 'done' }))
+  return (propsData.fileList || []).map((e: any) => ({ ...e, status: 'done' }))
 })
 
 const showUploadList = computed(() => {
@@ -120,7 +120,7 @@ const doUpload = async (file: any) => {
     const { data, code, msg } = await apiFileUpload(file)
     if (code != 20000) throw new Error(msg)
     emits('file-change', data)
-  } catch (e) {
+  } catch (e: any) {
     message.error(e.message)
     console.log(e)
   } finally {

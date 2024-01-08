@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 /**
  * @desc 打字机效果
@@ -6,12 +6,17 @@ import { ref } from 'vue'
 const useTypeWriter = (callback: Function, handleTypeDone: Function) => {
   const answerQueue = ref<string[]>([])
 
-  const consuming = ref<boolean>(false)
+  const receiveDone = ref<boolean>(false)
 
   const addTextToQueue = (str: string) => {
     if (!str) return
     answerQueue.value.push(...str.split(''))
   }
+
+  const answerDone = computed(() => {
+    const hasStr = answerQueue.value.length > 0
+    return receiveDone.value || hasStr
+  })
 
   const handleConsume = () => {
     const hasStr = answerQueue.value.length > 0
@@ -19,7 +24,7 @@ const useTypeWriter = (callback: Function, handleTypeDone: Function) => {
       const str = answerQueue.value.shift()
       callback(str)
     }
-    if (consuming.value || hasStr) {
+    if (receiveDone.value || hasStr) {
       setTimeout(() => {
         handleConsume()
       }, dynamicSpeed())
@@ -38,18 +43,19 @@ const useTypeWriter = (callback: Function, handleTypeDone: Function) => {
     }
   }
 
-  const handleStart = () => {
-    consuming.value = true
+  const handleReceiveStart = () => {
+    receiveDone.value = true
     handleConsume()
   }
 
-  const handleDone = () => {
-    consuming.value = false
+  const handleReceiveDone = () => {
+    receiveDone.value = false
   }
 
   return {
-    handleStart,
-    handleDone,
+    answerDone,
+    handleReceiveStart,
+    handleReceiveDone,
     addTextToQueue,
     handleConsume,
   }

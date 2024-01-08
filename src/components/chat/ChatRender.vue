@@ -1,5 +1,5 @@
 <template>
-  <div v-if="chatContent.length > 0" ref="chatContentInstance" class="chat-wrap">
+  <div v-if="chatContent && chatContent.length > 0" ref="chatContentInstance" class="chat-wrap">
     <div class="chat-item" v-for="item in chatContent" :key="item.id">
       <div class="user-info-wrap">
         <a-avatar shape="square">
@@ -80,7 +80,7 @@ const getChatAnswer = async (queryMsg: string) => {
   while (isContinue) {
     const { value, done } = await reader.read()
     if (done) {
-      handleDone()
+      handleReceiveDone()
       isContinue = false
       break // 读取完毕
     } else {
@@ -139,7 +139,7 @@ const handleTextDecoder = (answerArr: any[]) => {
             citeList: [],
           })
           addTextToQueue(itemObj.result)
-          handleStart()
+          handleReceiveStart()
         } else {
           addTextToQueue(itemObj.result)
         }
@@ -161,7 +161,10 @@ const handleTypeDone = () => {
   chatStore.chatInfoList[props.chatActiveIndex].chatContent = chatContent.value
 }
 
-const { addTextToQueue, handleStart, handleDone } = useTypeWriter(handleAddChatMessage, handleTypeDone)
+const { answerDone, addTextToQueue, handleReceiveStart, handleReceiveDone } = useTypeWriter(
+  handleAddChatMessage,
+  handleTypeDone,
+)
 
 /**
  * @desc 返回markdown格式
@@ -196,6 +199,9 @@ const handleScrollbarBottom = () => {
 }
 
 defineExpose({
+  answerDone,
+  chatContent,
+  messageLoading,
   getChatAnswer,
   setChatContent,
 })

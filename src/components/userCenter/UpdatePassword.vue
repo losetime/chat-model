@@ -125,7 +125,7 @@ const handleSave = () => {
         }
       }
     })
-    .catch((e) => {
+    .catch((e: any) => {
       console.warn(e)
     })
 }
