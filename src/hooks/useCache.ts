@@ -2,7 +2,7 @@ import { onBeforeMount } from 'vue'
 import { useAppStore } from '@/store/modules/app'
 import { useChatStore } from '@/store/modules/chat'
 import { useRouter } from 'vue-router'
-import { getPublicKey, generateClientKey } from '@/service/http/encipherHelper'
+// import { getPublicKey, generateClientKey } from '@/service/http/encipherHelper'
 
 const useCache = () => {
   const appStore = useAppStore()
@@ -31,16 +31,16 @@ const useCache = () => {
     // await getAppStore()
   })
 
-  const getAppStore = async () => {
-    const appStoreCache = sessionStorage.getItem('appStore')
-    if (appStoreCache) {
-      appStore.$state = JSON.parse(appStoreCache)
-      await appStore.GetRoutersInfo()
-      await appStore.GetUserInfo()
-    } else {
-      router.replace({ name: 'Login' })
-    }
-  }
+  // const getAppStore = async () => {
+  //   const appStoreCache = sessionStorage.getItem('appStore')
+  //   if (appStoreCache) {
+  //     appStore.$state = JSON.parse(appStoreCache)
+  //     await appStore.GetRoutersInfo()
+  //     await appStore.GetUserInfo()
+  //   } else {
+  //     router.replace({ name: 'Login' })
+  //   }
+  // }
 
   const getChatStore = async () => {
     const chatStoreCache = localStorage.getItem('chatStore')

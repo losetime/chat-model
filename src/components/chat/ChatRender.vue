@@ -1,5 +1,5 @@
 <template>
-  <div v-if="chatContent.length > 0" ref="chatContentInstance" class="chat-wrap">
+  <div v-if="chatContent && chatContent.length > 0" ref="chatContentInstance" class="chat-wrap">
     <div class="chat-item" v-for="item in chatContent" :key="item.id">
       <div class="user-info-wrap">
         <a-avatar shape="square">
@@ -80,7 +80,7 @@ const getChatAnswer = async (queryMsg: string) => {
   while (isContinue) {
     const { value, done } = await reader.read()
     if (done) {
-      handleDone()
+      handleReceiveDone()
       isContinue = false
       break // 读取完毕
     } else {
@@ -139,7 +139,7 @@ const handleTextDecoder = (answerArr: any[]) => {
             citeList: [],
           })
           addTextToQueue(itemObj.result)
-          handleStart()
+          handleReceiveStart()
         } else {
           addTextToQueue(itemObj.result)
         }
@@ -161,7 +161,10 @@ const handleTypeDone = () => {
   chatStore.chatInfoList[props.chatActiveIndex].chatContent = chatContent.value
 }
 
-const { addTextToQueue, handleStart, handleDone } = useTypeWriter(handleAddChatMessage, handleTypeDone)
+const { answerDone, addTextToQueue, handleReceiveStart, handleReceiveDone } = useTypeWriter(
+  handleAddChatMessage,
+  handleTypeDone,
+)
 
 /**
  * @desc 返回markdown格式
@@ -196,6 +199,9 @@ const handleScrollbarBottom = () => {
 }
 
 defineExpose({
+  answerDone,
+  chatContent,
+  messageLoading,
   getChatAnswer,
   setChatContent,
 })
@@ -203,7 +209,7 @@ defineExpose({
 
 <style lang="less" scoped>
 .chat-wrap {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 190px);
   overflow-y: auto;
   padding: 28px;
   .chat-item {
@@ -211,7 +217,7 @@ defineExpose({
     margin-bottom: 28px;
     .user-info-wrap {
       .ant-avatar {
-        background-color: #87d068;
+        background-color: #1577ff;
       }
       .user-name {
         margin-left: 8px;
@@ -221,15 +227,15 @@ defineExpose({
     }
     .message-wrap {
       margin-left: 14px;
-      padding: 14px;
-      border-radius: 5px;
-      background-color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background-color: #eef6ff;
       .message-text {
         width: 100%;
+        color: #333333;
       }
       .cite-wrap {
         display: flex;
-        color: #84868c;
         font-size: 14px;
         margin-top: 14px;
         .cite-title {
@@ -237,13 +243,14 @@ defineExpose({
           width: 70px;
           flex-shrink: 0;
           padding: 6px 0;
+          color: #83868c;
         }
         .cite-list {
           width: 100%;
           display: flex;
           flex-wrap: wrap;
           span {
-            color: #84868c;
+            color: #83868c;
             font-size: 14px;
             padding: 6px 14px;
             cursor: pointer;
@@ -273,7 +280,7 @@ defineExpose({
   }
 }
 .empty-wrap {
-  height: calc(100vh - 140px);
+  height: calc(100vh - 190px);
   display: flex;
   align-items: center;
   justify-content: center;

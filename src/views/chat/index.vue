@@ -10,7 +10,10 @@
       >
         <div class="chat-name">
           <AliwangwangOutlined />
-          {{ item.chatName }}
+          <a-tooltip>
+            <template #title>{{ item.chatName }}</template>
+            <div class="name-text">{{ item.chatName }}</div>
+          </a-tooltip>
         </div>
         <a-space v-if="chatActiveIndex === index">
           <FormOutlined @click.stop="handleUpdateChat" />
@@ -20,8 +23,14 @@
     </div>
     <div class="content-wrap">
       <ChatRender ref="chatRenderInstance" :chatActiveIndex="chatActiveIndex" />
-      <div class="input-wrap">
-        <a-input v-model:value="questionMsg" placeholder="请输入" @pressEnter="handleQuestionSubmit" />
+      <div class="input-wrap" v-if="chatGroup.length > 0">
+        <a-textarea
+          v-model:value="questionMsg"
+          :autosize="{ minRows: 4 }"
+          placeholder="请输入"
+          allow-clear
+          @keyup.enter="handleQuestionSubmit"
+        />
         <a-button type="primary" :icon="h(SendOutlined)" :disabled="!questionMsg" @click="handleQuestionSubmit" />
       </div>
     </div>
@@ -39,6 +48,7 @@ import { useChatStore } from '@/store/modules/chat'
 import { YmModal } from '@/utils/antd'
 import { useCompRef } from '@/hooks/useCompRef'
 import { actionTypeEnum } from '@/enums/commonEnum'
+import { message } from 'ant-design-vue'
 
 const chatStore = useChatStore()
 
@@ -61,11 +71,22 @@ onMounted(() => {
 
 const chatRenderInstance = useCompRef<typeof ChatRender>()
 
-const handleQuestionSubmit = () => {
+const handleQuestionSubmit = (event: any) => {
   if (!questionMsg.value) return
-  const queryMsg = questionMsg.value
-  questionMsg.value = ''
-  chatRenderInstance.value?.getChatAnswer(queryMsg)
+  const instance = chatRenderInstance.value
+  if (instance?.messageLoading || instance?.answerDone) {
+    message.info('请稍等，正在接收...')
+  } else {
+    const queryMsg = questionMsg.value
+    questionMsg.value = ''
+    // 取消输入框回车后的换行
+    event.preventDefault()
+    // 修改对话标题为第一个问题
+    if (instance && instance.chatContent.length <= 0) {
+      chatGroup.value[chatActiveIndex.value].chatName = queryMsg
+    }
+    instance?.getChatAnswer(queryMsg)
+  }
 }
 
 /**
@@ -73,11 +94,15 @@ const handleQuestionSubmit = () => {
  */
 const handleChatInit = () => {
   const chatInfoList = chatStore.chatInfoList
-  if (chatInfoList.length <= 0) return
-  // 设置对话组
-  chatGroup.value = chatInfoList.map((item: any) => ({ chatName: item.chatName, chatId: item.chatId }))
-  // 设置对话内容
-  chatRenderInstance.value?.setChatContent(chatInfoList[chatActiveIndex.value].chatContent)
+  if (chatInfoList.length > 0) {
+    // 设置对话组
+    chatGroup.value = chatInfoList.map((item: any) => ({ chatName: item.chatName, chatId: item.chatId }))
+    // 设置对话内容
+    chatRenderInstance.value?.setChatContent(chatInfoList[chatActiveIndex.value].chatContent)
+  } else {
+    chatGroup.value = []
+    chatRenderInstance.value?.setChatContent([])
+  }
 }
 
 /**
@@ -93,9 +118,14 @@ const handleNewChat = () => {
  * @desc 切换对话
  */
 const handleSwitchChat = (chatId: string) => {
-  chatStore.chatActiveId = chatId
-  // 设置对话内容
-  chatRenderInstance.value?.setChatContent(chatStore.chatInfoList[chatActiveIndex.value].chatContent)
+  const instance = chatRenderInstance.value
+  if (instance?.answerDone) {
+    message.info('请稍等，正在接收...')
+  } else {
+    chatStore.chatActiveId = chatId
+    // 设置对话内容
+    chatRenderInstance.value?.setChatContent(chatStore.chatInfoList[chatActiveIndex.value].chatContent)
+  }
 }
 
 /**
@@ -122,34 +152,44 @@ const handleUpdateChat = () => {
 .chat-wrapper {
   padding: 14px;
   display: flex;
-  background-color: #f1efe7;
+  background-color: #ffffff;
   .group-wrap {
     width: 300px;
     height: calc(100vh - 28px);
     padding: 28px;
-    border: 1px solid #e1e0e0;
+    border: 1px solid #e5e5e5;
     .new-chat-group {
-      padding: 10px 14px;
-      border: 1px solid #e1e0e0;
+      height: 45px;
+      line-height: 45px;
       text-align: center;
+      cursor: pointer;
+      border-radius: 8px;
+      background-color: #1577ff;
+      color: #ffffff;
+    }
+    .group-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px;
+      margin-top: 14px;
+      border: 1px solid #e5e5e5;
       cursor: pointer;
       border-radius: 5px;
       &:hover {
         border: 1px dashed #1677ff;
         color: #1677ff;
       }
-    }
-    .group-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 14px 20px;
-      margin-top: 14px;
-      border: 1px solid #e1e0e0;
-      cursor: pointer;
-      border-radius: 5px;
-      &:hover {
-        border: 1px dashed #1677ff;
-        color: #1677ff;
+      .chat-name {
+        display: flex;
+        align-items: center;
+        .name-text {
+          width: 145px;
+          padding: 0 8px;
+          flex: 1;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
       }
     }
     .group-item-active {
@@ -163,82 +203,22 @@ const handleUpdateChat = () => {
     flex-direction: column;
     justify-content: space-between;
     margin-left: 14px;
-    border: 1px solid #e1e0e0;
-    .chat-wrap {
-      height: calc(100vh - 120px);
-      overflow-y: auto;
+    border: 1px solid #e5e5e5;
+    .input-wrap {
+      min-height: 100px;
+      display: flex;
       padding: 28px;
-      .chat-item {
-        display: flex;
-        margin-bottom: 28px;
-        .user-info-wrap {
-          .ant-avatar {
-            background-color: #87d068;
-          }
-          .user-name {
-            margin-left: 8px;
-            font-size: 16px;
-            font-weight: bold;
-          }
-        }
-        .message-wrap {
-          margin-left: 14px;
-          padding: 14px;
-          border-radius: 5px;
-          background-color: #ffffff;
-          .message-text {
-            width: 100%;
-          }
-          .cite-wrap {
-            display: flex;
-            color: #84868c;
-            font-size: 14px;
-            margin-top: 14px;
-            .cite-title {
-              display: inline-block;
-              width: 70px;
-              flex-shrink: 0;
-              padding: 6px 0;
-            }
-            .cite-list {
-              width: 100%;
-              display: flex;
-              flex-wrap: wrap;
-              span {
-                color: #84868c;
-                font-size: 14px;
-                padding: 6px 14px;
-                cursor: pointer;
-                &:hover {
-                  background-color: #f7f7f9;
-                  color: #1677ff;
-                }
-              }
-            }
-          }
-        }
-        .message-loading {
-          margin-left: 14px;
-          display: flex;
-          justify-content: center;
-          .anticon {
-            font-size: 25px;
-            color: #1677ff;
-          }
+      ::v-deep(.ant-input-affix-wrapper) {
+        .ant-input {
+          font-size: 16px;
         }
       }
-    }
-    .empty-wrap {
-      height: calc(100vh - 140px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .input-wrap {
-      display: flex;
-      padding: 28px;
+
       .ant-btn {
         margin-left: 14px;
+        font-size: 18px;
+        height: 40px;
+        width: 50px;
       }
     }
   }
