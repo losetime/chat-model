@@ -217,7 +217,7 @@ defineExpose({
     margin-bottom: 28px;
     .user-info-wrap {
       .ant-avatar {
-        background-color: #87d068;
+        background-color: #1577ff;
       }
       .user-name {
         margin-left: 8px;
