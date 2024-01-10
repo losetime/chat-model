@@ -209,7 +209,7 @@ defineExpose({
 
 <style lang="less" scoped>
 .chat-wrap {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 190px);
   overflow-y: auto;
   padding: 28px;
   .chat-item {
@@ -227,15 +227,15 @@ defineExpose({
     }
     .message-wrap {
       margin-left: 14px;
-      padding: 14px;
-      border-radius: 5px;
-      background-color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      background-color: #eef6ff;
       .message-text {
         width: 100%;
+        color: #333333;
       }
       .cite-wrap {
         display: flex;
-        color: #84868c;
         font-size: 14px;
         margin-top: 14px;
         .cite-title {
@@ -243,13 +243,14 @@ defineExpose({
           width: 70px;
           flex-shrink: 0;
           padding: 6px 0;
+          color: #83868c;
         }
         .cite-list {
           width: 100%;
           display: flex;
           flex-wrap: wrap;
           span {
-            color: #84868c;
+            color: #83868c;
             font-size: 14px;
             padding: 6px 14px;
             cursor: pointer;
@@ -279,7 +280,7 @@ defineExpose({
   }
 }
 .empty-wrap {
-  height: calc(100vh - 140px);
+  height: calc(100vh - 190px);
   display: flex;
   align-items: center;
   justify-content: center;
